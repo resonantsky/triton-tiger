@@ -141,8 +141,8 @@ Two issues on Windows:
 ---
 ## Required runtime environment variables : 
 
-CC = "SD.Next/venv/Lib/site-packages/_rocm_sdk_core/lib/llvm/bin/clang.exe"
-HIP_PATH = "SD.Next/venv/Lib/site-packages/_rocm_sdk_core/"
+1. set CC = "SD.Next/venv/Lib/site-packages/_rocm_sdk_core/lib/llvm/bin/clang.exe"
+2. set HIP_PATH = "SD.Next/venv/Lib/site-packages/_rocm_sdk_core/"
 
 
 ## Reference implementation
