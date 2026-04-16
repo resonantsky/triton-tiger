@@ -46,8 +46,8 @@ Ported the **triton-windows** architecture:
   argument-annotation metadata (`build_signature_metadata` / `PyKernelArg`)
   that was already present in the `hip_utils` C module.
 
-### Targeted adaptations for triton-tiger (vs triton-windows)
-| Detail | triton-windows | triton-tiger (this fix) |
+### Targeted adaptations for lshqqytiger/triton (vs triton-windows)
+| Detail | triton-windows | lshqqytiger/triton (this fix) |
 |--------|---------------|------------------------|
 | `packed_metadata` tuple | 3-element | **6-element** `(num_warps, num_ctas, shared, clusterDimX, clusterDimY, clusterDimZ)` |
 | Extra scratch params | `+2` (global + profile) | **`+1`** (global only) |
