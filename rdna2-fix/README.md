@@ -139,6 +139,11 @@ Two issues on Windows:
    requiring a system-level ROCm installation.
 
 ---
+## Required runtime environment variables : 
+
+CC = "SD.Next/venv/Lib/site-packages/_rocm_sdk_core/lib/llvm/bin/clang.exe"
+HIP_PATH = "SD.Next/venv/Lib/site-packages/_rocm_sdk_core/"
+
 
 ## Reference implementation
 These fixes were derived by comparing triton-tiger against the
