@@ -1,4 +1,4 @@
-# RDNA2 / Windows Fix — triton-tiger
+# RDNA2 / Windows Fix — lshqqytiger/triton
 
 Patches for running https://github.com/lshqqytiger/triton on **AMD RDNA2 (gfx1030, RX 6800)** under
 **Windows** with ROCm SDK 7.1 / HIP 7.2.  Upstream lshqqytiger/triton targets Linux
