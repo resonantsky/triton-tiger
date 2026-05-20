@@ -141,11 +141,22 @@ Two issues on Windows:
    requiring a system-level ROCm installation.
 
 ---
-## Required runtime environment variables : 
+## Required runtime environment variables [PS] : 
 
-1. set CC = "SD.Next/venv/Lib/site-packages/_rocm_sdk_core/lib/llvm/bin/clang.exe"
-2. set HIP_PATH = "SD.Next/venv/Lib/site-packages/_rocm_sdk_core/"
+### --- 1. Core Hardware Backend & Compiler Toolchain ---
+$env:HIP_PATH = "E:/SD.Next/venv/Lib/site-packages/_rocm_sdk_core/"
+$env:CC       = "E:/SD.Next/venv/Lib/site-packages/_rocm_sdk_core/lib/llvm/amdclang.exe"
+$env:CXX       = "E:/SD.Next/venv/Lib/site-packages/_rocm_sdk_core/lib/llvm/amdclang++.exe"
+$env:HSA_XNACK = $null
 
+### --- 3. Restrict Search Heuristics to Initial Hard Guess ---
+### --- 4. Target Engine Routing & Fallbacks (Restored to Defaults) ---
+$env:TRITON_USE_HIP                            = "1"          # Keep at 1: Safe baseline for AMD/ROCm compilation
+$env:SAGE_ATTENTION_TRITON_AMD_ENABLE          = $null        # Default: Unset (Framework or extension level default configuration)
+
+### --- 5. Pure Production Logging & Caching ---
+$env:TORCH_LOGS                 = "-inductor,-autotuning"                      # Terminate all console telemetry
+$env:TORCHINDUCTOR_CACHE_DIR    = "E:\torchinductor-cache"    # Retain physical NVMe saving location
 
 ## Reference implementation
 These fixes were derived by comparing triton-tiger against the
