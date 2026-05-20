@@ -144,19 +144,27 @@ Two issues on Windows:
 ## Required runtime environment variables [PS] : 
 
 ### --- 1. Core Hardware Backend & Compiler Toolchain ---
+
 `$env:HIP_PATH = "E:/SD.Next/venv/Lib/site-packages/_rocm_sdk_core/"`
+
 `$env:CC       = "E:/SD.Next/venv/Lib/site-packages/_rocm_sdk_core/lib/llvm/amdclang.exe"`
+
 `$env:CXX       = "E:/SD.Next/venv/Lib/site-packages/_rocm_sdk_core/lib/llvm/amdclang++.exe"`
+
 `$env:HSA_XNACK = $null`
 
 ### --- 3. Restrict Search Heuristics to Initial Hard Guess ---
 ### --- 4. Target Engine Routing & Fallbacks (Restored to Defaults) ---
-`$env:TRITON_USE_HIP                            = "1"         
-`$env:SAGE_ATTENTION_TRITON_AMD_ENABLE          = $null        # This no longer needs to be set but can be set.
+
+`$env:TRITON_USE_HIP                            = "1"`         
+
+`$env:SAGE_ATTENTION_TRITON_AMD_ENABLE          = $null`        # This no longer needs to be set but can be set.
 
 ### --- 5. Pure Production Logging & Caching ---
-`$env:TORCH_LOGS                 = "-inductor"                      # Inductor graphs off
-`$env:TORCHINDUCTOR_CACHE_DIR    = "E:\torchinductor-cache"    # Retain physical NVMe saving location
+
+`$env:TORCH_LOGS                 = "-inductor"`                      # Inductor graphs off
+
+`$env:TORCHINDUCTOR_CACHE_DIR    = "E:\torchinductor-cache"`    # Retain physical NVMe saving location
 
 ## Reference implementation
 These fixes were derived by comparing triton-tiger against the
