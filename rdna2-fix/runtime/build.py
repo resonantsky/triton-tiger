@@ -25,29 +25,58 @@ def _build(name: str, src: str, srcdir: str, library_dirs: list[str], include_di
     # try to avoid setuptools if possible
 
     import sys as _sys
-    _sdk_root = os.path.join(_sys.prefix, 'Lib', 'site-packages', '_rocm_sdk_core')
+    import subprocess
+    _sdk_root = os.path.normpath(os.path.join(_sys.prefix, 'Lib', 'site-packages', '_rocm_sdk_core'))
 
     cc = os.environ.get("CC")
-    if cc is None:
+    if cc:
+        cc = os.path.normpath(cc)
+
+    # Corrected lookup loops targeting the proper \llvm\bin\ folder structures on Windows
+    if cc is None or not os.path.exists(cc):
         rocm_path = os.environ.get("ROCM_PATH") or os.environ.get("HIP_PATH")
         if rocm_path:
-            clang = os.path.join(rocm_path, 'bin', 'clang.exe')
-            if os.path.exists(clang):
-                print("Using HIP SDK Clang.")
-                cc = clang
-    if cc is None:
-        clang = os.path.join(_sdk_root, 'lib', 'llvm', 'bin', 'clang.exe')
-        if os.path.exists(clang):
-            print("Using venv ROCm SDK Clang.")
-            cc = clang
+            rocm_path = os.path.normpath(rocm_path)
+            for bin_name in ['amdclang.exe', 'clang.exe']:
+                # Strategy A: Check standard bin/
+                target = os.path.join(rocm_path, 'bin', bin_name)
+                if os.path.exists(target):
+                    cc = target
+                    break
+                # Strategy B: Check llvm/bin/
+                target_llvm = os.path.join(rocm_path, 'llvm', 'bin', bin_name)
+                if os.path.exists(target_llvm):
+                    cc = target_llvm
+                    break
+                # Strategy C: Check lib/llvm/bin/
+                target_lib_llvm = os.path.join(rocm_path, 'lib', 'llvm', 'bin', bin_name)
+                if os.path.exists(target_lib_llvm):
+                    cc = target_lib_llvm
+                    break
 
-    if cc is None:
+    if cc is None or not os.path.exists(cc):
+        for bin_name in ['amdclang.exe', 'clang.exe']:
+            # Explicit correction for venv layout
+            target = os.path.join(_sdk_root, 'llvm', 'bin', bin_name)
+            if os.path.exists(target):
+                cc = target
+                break
+            target_legacy = os.path.join(_sdk_root, 'lib', 'llvm', 'bin', bin_name)
+            if os.path.exists(target_legacy):
+                cc = target_legacy
+                break
+
+    if cc is None or not os.path.exists(cc):
         clang = shutil.which("clang")
         gcc = shutil.which("gcc")
         cc = gcc if gcc is not None else clang
         if cc is None:
             raise RuntimeError(
                 "Failed to find C compiler. Please specify via CC environment variable or set triton.knobs.build.impl.")
+
+    # Standardize path slashes on the finalized compiler match
+    cc = os.path.normpath(cc)
+
     # This function was renamed and made public in Python 3.10
     if hasattr(sysconfig, 'get_default_scheme'):
         scheme = sysconfig.get_default_scheme()
@@ -63,7 +92,7 @@ def _build(name: str, src: str, srcdir: str, library_dirs: list[str], include_di
     
     library_dirs += [os.path.join(_sys.prefix, 'libs')]
     _hip_lib = os.environ.get('HIP_PATH') or _sdk_root
-    library_dirs += [os.path.join(_hip_lib, 'lib')]
+    library_dirs += [os.path.normpath(os.path.join(_hip_lib, 'lib'))]
 
     if os.name == "nt":
         version = sysconfig.get_python_version().replace(".", "")
@@ -71,16 +100,27 @@ def _build(name: str, src: str, srcdir: str, library_dirs: list[str], include_di
             version += "t"
         libraries = libraries + [f"python{version}"]
 
-    # for -Wno-psabi, see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=111047
-    cc_cmd = [cc, src, "-O3", "-shared", "-Wno-psabi", "-o", so]
-    cc_cmd += [f'-l{lib}' for lib in libraries]
-    cc_cmd += [f"-L{dir}" for dir in library_dirs]
-    cc_cmd += [f"-I{dir}" for dir in include_dirs if dir is not None]
-    subprocess.check_call(cc_cmd, stdout=subprocess.DEVNULL)
+    cc_lower = os.path.basename(cc).lower()
+    is_msvc = "cl" in cc_lower and "clang" not in cc_lower
+
+    if is_msvc:
+        cc_cmd = [cc, src, "/O2", "/LD", f"/Fe{so}"]
+        cc_cmd += [f"/I{dir}" for dir in include_dirs if dir is not None]
+        linker_args = [f"/LIBPATH:{dir}" for dir in library_dirs]
+        linker_args += [f"{lib}.lib" for lib in libraries]
+        if linker_args:
+            cc_cmd += ["/LINK"] + linker_args
+    else:
+        # GCC/Clang/amdclang style syntax 
+        cc_cmd = [cc, src, "-O3", "-shared", "-o", so]
+        cc_cmd += [f'-l{lib}' for lib in libraries]
+        cc_cmd += [f"-L{dir}" for dir in library_dirs]
+        cc_cmd += [f"-I{dir}" for dir in include_dirs if dir is not None]
+    
+    # Run natively on Windows paths safely
+    subprocess.check_call(cc_cmd, stdout=subprocess.DEVNULL, shell=(os.name == "nt"))
     return so
 
-
-@functools.lru_cache
 def platform_key() -> str:
     from platform import machine, system, architecture
     return ",".join([machine(), system(), *architecture()])
