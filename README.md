@@ -143,14 +143,14 @@ Two issues on Windows:
 ---
 ## Required runtime environment variables [PS] : 
 
-`$env:HIP_PATH = "E:/SD.Next/venv/Lib/site-packages/_rocm_sdk_core/"`
-`$env:CC       = "E:/SD.Next/venv/Lib/site-packages/_rocm_sdk_core/lib/llvm/amdclang.exe"`
-`$env:CXX       = "E:/SD.Next/venv/Lib/site-packages/_rocm_sdk_core/lib/llvm/amdclang++.exe"`
-`$env:HSA_XNACK = $null`
-`$env:TRITON_USE_HIP                            = "1"`         
-`$env:SAGE_ATTENTION_TRITON_AMD_ENABLE          = $null        # This no longer needs to be set but can be set.`
-`$env:TORCH_LOGS                 = "-inductor"                     # Inductor graphs off`
-`$env:TORCHINDUCTOR_CACHE_DIR    = "E:\torchinductor-cache"    # Retain physical NVMe saving location`
+1.`$env:HIP_PATH = "E:/SD.Next/venv/Lib/site-packages/_rocm_sdk_core/"`
+2.`$env:CC       = "E:/SD.Next/venv/Lib/site-packages/_rocm_sdk_core/lib/llvm/amdclang.exe"`
+3.`$env:CXX       = "E:/SD.Next/venv/Lib/site-packages/_rocm_sdk_core/lib/llvm/amdclang++.exe"`
+4.`$env:HSA_XNACK = $null`
+5.`$env:TRITON_USE_HIP                            = "1"`         
+6.`$env:SAGE_ATTENTION_TRITON_AMD_ENABLE          = $null        # This no longer needs to be set but can be set.`
+7.`$env:TORCH_LOGS                 = "-inductor"                     # Inductor graphs off`
+8.`$env:TORCHINDUCTOR_CACHE_DIR    = "E:\torchinductor-cache"    # Retain physical NVMe saving location`
 
 ## Reference implementation
 These fixes were derived by comparing triton-tiger against the
